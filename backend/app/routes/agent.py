@@ -5,7 +5,7 @@ from app.services.parser import extract_text_from_pdf
 from app.utils.prompts import extract_skills_prompt
 from app.services.llm import call_llm
 from app.services.learning_plan import generate_learning_plan
-from backend.app.services.assessment import detect_ai_answer
+from app.services.assessment import detect_ai_answer
 
 router = APIRouter()
 
@@ -100,20 +100,23 @@ def get_result():
 def get_learning_plan():
     global _agent, _missing_skills
     if _agent is None:
-        return {"error": "Interview not started."}
+        return {"error": "Interview not started"}
 
-    result = _agent.get_result()
+    try:
+        result = _agent.get_result()
+        weak_skills = [
+            skill for skill, score in result["final_scores"].items()
+            if score < 6
+        ]
+        all_gaps = list(set(weak_skills + _missing_skills))
 
-    # Weak = low score wale + JD mein the but resume mein nahi the
-    weak_from_score = [
-        skill for skill, score in result["final_scores"].items()
-        if score < 6
-    ]
+        # Fallback agar koi gap nahi
+        if not all_gaps:
+            all_gaps = list(result["final_scores"].keys())
 
-    # Dono combine karo — duplicates hatao
-    all_gaps = list(set(weak_from_score + _missing_skills))
-
-    return generate_learning_plan(all_gaps)
+        return generate_learning_plan(all_gaps)
+    except Exception as e:
+        return {"plan": [], "error": str(e)}
 
 
 @router.post("/answer")

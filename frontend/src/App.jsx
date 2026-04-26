@@ -87,6 +87,7 @@ function InterviewScreen({ initialData, onFinish }) {
   const [currentSkill, setCurrentSkill] = useState(initialData.first_question?.skill || '')
   const [question, setQuestion] = useState(initialData.first_question?.question || '')
   const [evaluation, setEvaluation] = useState(null)
+  const [cheatResult, setCheatResult] = useState(null)  // For cheat detection feedback
   const [done, setDone] = useState(initialData.first_question?.done || false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -105,6 +106,7 @@ function InterviewScreen({ initialData, onFinish }) {
       const data = await res.json()
       if (data.error) { setError(data.error); return }
       setEvaluation(data.evaluation)
+      setCheatResult(data.cheat_detection || null)
       answerRef.current = ''
       const ta = document.getElementById('answer-box')
       if (ta) ta.value = ''
@@ -242,14 +244,34 @@ function PlanScreen({ plan, onReset }) {
             <span>◆ {item.skill}</span>
             {item.timeline && <span className="plan-timeline">{item.timeline}</span>}
           </div>
+
           {item.topics?.length > 0 && (
             <div className="plan-topics">
-              {item.topics.map((t, j) => <span className="topic-tag" key={j}>{t}</span>)}
+              {item.topics.map((t, j) => (
+                <span className="topic-tag" key={j}>
+                  {typeof t === 'object' ? t.title || t.name || JSON.stringify(t) : t}
+                </span>
+              ))}
             </div>
           )}
+
           {item.resources?.length > 0 && (
             <ul className="plan-resources">
-              {item.resources.map((r, j) => <li key={j}>{r}</li>)}
+              {item.resources.map((r, j) => (
+                <li key={j}>
+                  {/* ✅ Handle both string and object resources */}
+                  {typeof r === 'object' ? (
+                    r.url ? (
+                      <a href={r.url} target="_blank" rel="noreferrer"
+                        style={{ color: 'var(--accent2)', textDecoration: 'none' }}>
+                        {r.title || r.url}
+                      </a>
+                    ) : (
+                      r.title || r.name || JSON.stringify(r)
+                    )
+                  ) : r}
+                </li>
+              ))}
             </ul>
           )}
         </div>
@@ -262,7 +284,6 @@ function PlanScreen({ plan, onReset }) {
     </div>
   )
 }
-
 // ─── MAIN APP ─────────────────────────────────────────────────
 export default function App() {
   const [step, setStep] = useState(0)
