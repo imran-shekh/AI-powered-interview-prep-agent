@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import './App.css'
 
-const API = '/api'
+const API = 'https://ai-powered-interview-prep-agent.onrender.com'
 const STEPS = ['Upload', 'Interview', 'Results', 'Learning Plan']
 
 function scoreColor(score) {
