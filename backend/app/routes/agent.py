@@ -5,6 +5,7 @@ from app.services.parser import extract_text_from_pdf
 from app.utils.prompts import extract_skills_prompt
 from app.services.llm import call_llm
 from app.services.learning_plan import generate_learning_plan
+from backend.app.services.assessment import detect_ai_answer
 
 router = APIRouter()
 
@@ -113,3 +114,20 @@ def get_learning_plan():
     all_gaps = list(set(weak_from_score + _missing_skills))
 
     return generate_learning_plan(all_gaps)
+
+
+@router.post("/answer")
+async def answer_question(answer: str = Body(..., embed=True)):
+    global _agent
+    if _agent is None:
+        return {"error": "Interview not started."}
+
+
+    cheat_check = detect_ai_answer(answer)
+
+    result = _agent.submit_answer(answer.strip())
+
+    # Add cheat check to response
+    result["cheat_detection"] = cheat_check
+
+    return result

@@ -144,19 +144,30 @@ function InterviewScreen({ initialData, onFinish }) {
           <div className="skill-badge">◆ Skill: {currentSkill}</div>
 
           {evaluation && (
-            <div className="eval-card">
-              <div>
-                <div className="eval-label">Last Score</div>
-                <div className={`eval-score ${evaluation.score >= 7 ? 'high' : evaluation.score >= 4 ? 'mid' : 'low'}`}>
-                  {evaluation.score}<span style={{ fontSize: '0.9rem', fontFamily: 'DM Mono' }}>/10</span>
-                </div>
-              </div>
-              <div>
-                <div className="eval-label">Feedback</div>
-                <div className="eval-feedback">{evaluation.feedback}</div>
-              </div>
-            </div>
-          )}
+  <>
+    <div className="eval-card">
+      {/* existing evaluation card — same as before */}
+      <div>
+        <div className="eval-label">Last Score</div>
+        <div className={`eval-score ${evaluation.score >= 7 ? 'high' : evaluation.score >= 4 ? 'mid' : 'low'}`}>
+          {evaluation.score}<span style={{ fontSize: '0.9rem' }}>/10</span>
+        </div>
+      </div>
+      <div>
+        <div className="eval-label">Feedback</div>
+        <div className="eval-feedback">{evaluation.feedback}</div>
+      </div>
+    </div>
+
+    {/* ✅ Cheat detection badge */}
+    {cheatResult && cheatResult.is_suspicious && (
+      <div className="cheat-warning">
+        ⚠️ Suspicious answer detected — {cheatResult.reason}
+        <span className="cheat-confidence">confidence: {cheatResult.confidence}</span>
+      </div>
+    )}
+  </>
+  )}
 
           <div className="question-card">
             <div className="q-label">Question</div>
