@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from app.routes import extract, agent
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
